@@ -1,0 +1,64 @@
+# $Id: typemap,v 1.1 1994/11/21 03:02:46 ilya Exp ilya $
+
+GEN	T_Pari
+GENCOL	T_PariCol
+GENMAT	T_PariMat
+bool	T_bool
+PariVar	T_PariVar
+
+################################
+
+INPUT
+
+T_Pari
+	$var=sv2pari($arg);
+T_PariCol
+	$var=sv2pari($arg);
+	if (typ($var)!=17) croak("Not a vector when vector-column expected");
+	settyp($var,18);
+T_PariMat
+	$var=sv2parimat($arg);
+T_bool
+	$var=SvTRUE($arg);
+T_PariVar
+	$var=findVariable((char *)SvPV($arg,na));
+
+
+################################
+
+OUTPUT
+
+T_bool
+	$arg=$var? &sv_yes: &sv_no;
+
+##### We put an address into SvIV(SvRV). We also need to keep oldavma
+##### and previous SV on the Pari stack. If previous SV is NULL, the
+##### corresponding GEN is moved off the stack. If it is PariStack,
+##### then this SV is the first Perl value put on the stack.
+
+##### The result of sv_setref_pv is reference to PVMG. We put previous
+##### SV into xpv_pv, and offset of oldavma into xpv_cur.
+
+T_Pari
+	sv_setref_pv($arg, \"Math::Pari\", (void*)$var);
+	if (isonstack($var)) {
+	  SvCUR(SvRV($arg))=oldavma-bot;
+	  SvPVX(SvRV($arg))=(char*)PariStack;
+	  PariStack=SvRV($arg);
+	} else SvPVX(SvRV($arg))=(char*)&PariStack; /* An atom. */
+T_PariCol
+	sv_setref_pv($arg, \"Math::Pari\", (void*)$var);
+	if (isonstack($var)) {
+	  SvCUR(SvRV($arg))=oldavma-bot;
+	  SvPVX(SvRV($arg))=(char*)PariStack;
+	  PariStack=SvRV($arg);
+	} else SvPVX(SvRV($arg))=(char*)&PariStack; /* An atom. */
+T_PariMat
+	sv_setref_pv($arg, \"Math::Pari\", (void*)$var);
+	if (isonstack($var)) {
+	  SvCUR(SvRV($arg))=oldavma-bot;
+	  SvPVX(SvRV($arg))=(char*)PariStack;
+	  PariStack=SvRV($arg);
+	} else SvPVX(SvRV($arg))=(char*)&PariStack; /* An atom. */
+T_PariVar
+	Not Supported;

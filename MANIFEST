@@ -1,0 +1,8 @@
+Pari.pm
+Pari.xs
+MANIFEST
+Makefile.PL
+README
+parifonc.pl
+t/Pari.t
+typemap
